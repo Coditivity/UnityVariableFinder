@@ -214,7 +214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eea02df2c442c1e4b9b62a4f2e06e82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  potato: d3g
+  potato: fd
   testInt: 33
 --- !u!20 &282840813
 Camera:

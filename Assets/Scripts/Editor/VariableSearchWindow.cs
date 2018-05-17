@@ -3,12 +3,10 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Coditivity.GameFramework
+namespace Coditivity.GameFramework.Editor
 {
     public class VariableSearchWindow : EditorWindow
     {
-
-
         static MonoBehaviour _monoBehaviour = null;
         static SerializedObject _serializedObject = null;
         static FieldInfo[] _fields = null;
@@ -18,7 +16,7 @@ namespace Coditivity.GameFramework
         {
 
             _monoBehaviour = menuCommand.context as MonoBehaviour;
-            _serializedObject = new UnityEditor.SerializedObject(_monoBehaviour);
+            _serializedObject = new SerializedObject(_monoBehaviour);
             Type type = _monoBehaviour.GetType();
             _fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
             GetWindow(typeof(VariableSearchWindow));
@@ -38,6 +36,7 @@ namespace Coditivity.GameFramework
                 variableName = newVariableName;
             }
 
+            _serializedObject.Update();
             foreach (FieldInfo field in _fields)
             {
                 if (!string.IsNullOrEmpty(variableName))
@@ -46,19 +45,14 @@ namespace Coditivity.GameFramework
                     {
                         SerializedProperty property = _serializedObject.FindProperty(field.Name);
                         if (property != null)
-                        {
-                            GUIContent content = new GUIContent(field.Name + " :");
+                        {   
+                            GUIContent content = new GUIContent(field.Name + " :", property.tooltip);
                             EditorGUILayout.PropertyField(property, content);
                         }
                     }
                 }
-            }
-
+            }            
             _serializedObject.ApplyModifiedProperties();
-
-
-
-
         }
 
         private void OnDestroy()
