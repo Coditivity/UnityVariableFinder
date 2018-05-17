@@ -3,57 +3,70 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-public class VariableSearchWindow : EditorWindow {
-
-
-    static MonoBehaviour _monoBehaviour = null;
-    static SerializedObject _serializedObject = null;
-
-    [MenuItem("CONTEXT/MonoBehaviour/Find Variable")]    
-    private static void SearchWidow(MenuCommand menuCommand)
+namespace Coditivity.GameFramework
+{
+    public class VariableSearchWindow : EditorWindow
     {
 
-        _monoBehaviour = menuCommand.context as MonoBehaviour;
-        _serializedObject = new UnityEditor.SerializedObject(_monoBehaviour);
-        GetWindow(typeof(VariableSearchWindow));
-    }
 
+        static MonoBehaviour _monoBehaviour = null;
+        static SerializedObject _serializedObject = null;
+        static FieldInfo[] _fields = null;
 
-    string variableName = null;
-    string variableCount = "";
-    private void OnGUI()
-    {
-        
-        string newVariableName = EditorGUILayout.TextField("Variable name:", variableName);
-        FieldInfo[] fields = null;
-        if(string.Compare(newVariableName, variableName) != 0)
+        [MenuItem("CONTEXT/MonoBehaviour/Find Variable")]
+        private static void SearchWidow(MenuCommand menuCommand)
         {
+
+            _monoBehaviour = menuCommand.context as MonoBehaviour;
+            _serializedObject = new UnityEditor.SerializedObject(_monoBehaviour);
             Type type = _monoBehaviour.GetType();
-            fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            variableName = newVariableName;
-            variableCount = fields[0].Name;// .Length.ToString();
-            
+            _fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            GetWindow(typeof(VariableSearchWindow));
+
         }
-        
-       // if(fields!=null)
+
+
+        string variableName = null;
+        string variableCount = "";
+        private void OnGUI()
         {
-            //if (fields.Length > 0)
+
+            string newVariableName = EditorGUILayout.TextField("Variable name:", variableName);
+
+            if (string.Compare(newVariableName, variableName) != 0)
             {
-                GUIContent content = new GUIContent("Name: ");
-                EditorGUILayout.PropertyField(_serializedObject.FindProperty("potato"), content);
-                _serializedObject.ApplyModifiedProperties();
+                variableName = newVariableName;
             }
+
+            foreach (FieldInfo field in _fields)
+            {
+                if (!string.IsNullOrEmpty(variableName))
+                {
+                    if (field.Name.ToLower().Contains(variableName.ToLower()))
+                    {
+                        SerializedProperty property = _serializedObject.FindProperty(field.Name);
+                        if (property != null)
+                        {
+                            GUIContent content = new GUIContent(field.Name + " :");
+                            EditorGUILayout.PropertyField(property, content);
+                        }
+                    }
+                }
+            }
+
+            _serializedObject.ApplyModifiedProperties();
+
+
+
+
         }
-       
 
-
-
-        
+        private void OnDestroy()
+        {
+            _monoBehaviour = null;
+            _serializedObject = null;
+            _fields = null;
+        }
     }
 
-    private void OnDestroy()
-    {
-        _monoBehaviour = null;
-        _serializedObject = null;
-    }
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 public class TestScript : MonoBehaviour {
 
     public string potato;
+    public int testInt;
 	// Use this for initialization
 	void Start () {
 		
