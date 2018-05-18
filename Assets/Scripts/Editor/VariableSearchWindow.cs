@@ -36,13 +36,13 @@ namespace Coditivity.GameFramework.Editor
 
             GUIStyle style = new GUIStyle();
             style.fontStyle = FontStyle.Bold;
-            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-            EditorGUILayout.BeginHorizontal();
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos); //Full window vertical scroll start
+            EditorGUILayout.BeginHorizontal();  //Search field start
             EditorGUILayout.LabelField("Variable Name:", style);
             EditorGUI.indentLevel -= 4;
             GUI.SetNextControlName(nameVariableNameField);
             string newVariableName = EditorGUILayout.TextField(variableName);
-            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();    //Search field end
 
             if(firstRun)
             {
@@ -59,22 +59,29 @@ namespace Coditivity.GameFramework.Editor
             }
 
             _serializedObject.Update();
-            foreach (FieldInfo field in _fields)
+            foreach (FieldInfo field in _fields) //for each variable in the script
             {
-                if (!string.IsNullOrEmpty(variableName))
+                if (!string.IsNullOrEmpty(variableName)) //if the given variable name isn't empty
                 {
-                    if (field.Name.ToLower().Contains(variableName.ToLower()))
+                    if (field.Name.ToLower().Contains(variableName.ToLower())) //if the variable name contains the given string
                     {
                         SerializedProperty property = _serializedObject.FindProperty(field.Name);
-                        if (property != null)
-                        {   
-                            GUIContent content = new GUIContent(field.Name + " :", property.tooltip);
+                        if (property != null) //if the property is actually serialized
+                        {
+
+                            string tooltip = field.Name + ": " + property.tooltip;
+                            GUIContent content = new GUIContent(field.Name + " :", tooltip);
+                          //  EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true), GUILayout.);  //variable name and value start                                                        
+                           // EditorGUILayout.LabelField(content);
+                            //EditorGUI.indentLevel -= 4;
                             EditorGUILayout.PropertyField(property, content, true);
+                            //EditorGUI.indentLevel += 4;
+                          //  EditorGUILayout.EndHorizontal(); //variable name and value end
                         }
                     }
                 }
             }
-            EditorGUILayout.EndScrollView();
+            EditorGUILayout.EndScrollView(); //Full window vertical scroll end
             _serializedObject.ApplyModifiedProperties();
         }
 
