@@ -14,23 +14,45 @@ namespace Coditivity.GameFramework.Editor
         [MenuItem("CONTEXT/MonoBehaviour/Find Variable")]
         private static void SearchWidow(MenuCommand menuCommand)
         {
-
             _monoBehaviour = menuCommand.context as MonoBehaviour;
             _serializedObject = new SerializedObject(_monoBehaviour);
             Type type = _monoBehaviour.GetType();
             _fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            GetWindow(typeof(VariableSearchWindow));
-
+            GetWindow(typeof(VariableSearchWindow), true, _monoBehaviour.GetType().ToString() + ": Variable Search");
+            
         }
 
 
         string variableName = null;
         string variableCount = "";
+
+        const string nameVariableNameField = "variableNameField";
+        bool firstRun = true; //If window opened for the first time
+
+        Vector2 scrollPos = Vector2.zero;
         private void OnGUI()
         {
 
-            string newVariableName = EditorGUILayout.TextField("Variable name:", variableName);
 
+            GUIStyle style = new GUIStyle();
+            style.fontStyle = FontStyle.Bold;
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Variable Name:", style);
+            EditorGUI.indentLevel -= 4;
+            GUI.SetNextControlName(nameVariableNameField);
+            string newVariableName = EditorGUILayout.TextField(variableName);
+            EditorGUILayout.EndHorizontal();
+
+            if(firstRun)
+            {
+                firstRun = false;
+                EditorGUI.FocusTextInControl(nameVariableNameField);
+            }
+
+            EditorGUI.indentLevel += 4;
+            EditorGUILayout.Separator();
+            
             if (string.Compare(newVariableName, variableName) != 0)
             {
                 variableName = newVariableName;
@@ -47,11 +69,12 @@ namespace Coditivity.GameFramework.Editor
                         if (property != null)
                         {   
                             GUIContent content = new GUIContent(field.Name + " :", property.tooltip);
-                            EditorGUILayout.PropertyField(property, content);
+                            EditorGUILayout.PropertyField(property, content, true);
                         }
                     }
                 }
-            }            
+            }
+            EditorGUILayout.EndScrollView();
             _serializedObject.ApplyModifiedProperties();
         }
 
